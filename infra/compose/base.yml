@@ -24,8 +24,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ../scripts/init-postgres.sh:/docker-entrypoint-initdb.d/01-init.sh:ro
-      - ../scripts/postgres-entrypoint.sh:/scripts/postgres-entrypoint.sh:ro
-    entrypoint: ["/bin/bash", "/scripts/postgres-entrypoint.sh"]
     healthcheck:
       test:
         [
