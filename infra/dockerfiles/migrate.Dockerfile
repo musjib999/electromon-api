@@ -23,7 +23,8 @@ RUN pnpm install --frozen-lockfile
 # Prisma 7 loads prisma.config.ts at generate time; a dummy URL is enough (no DB connect).
 RUN DATABASE_URL="postgresql://build:build@127.0.0.1:5432/build?schema=public" npx prisma generate
 
+COPY infra/scripts/compose-database-url.sh /compose-database-url.sh
 COPY infra/scripts/entrypoint-migrate.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+RUN chmod +x /compose-database-url.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]

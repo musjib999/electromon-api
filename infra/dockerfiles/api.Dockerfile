@@ -51,8 +51,9 @@ COPY --from=builder --chown=nestjs:nodejs /app/shared ./shared
 ENV NODE_PATH=/app/db/node_modules:/app/node_modules
 ENV API_PORT=3002
 
+COPY --chown=nestjs:nodejs infra/scripts/compose-database-url.sh /compose-database-url.sh
 COPY --chown=nestjs:nodejs infra/scripts/entrypoint-api.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+RUN chmod +x /compose-database-url.sh /entrypoint.sh
 
 USER nestjs
 

@@ -27,11 +27,13 @@ Use the single-file stack instead:
 1. Compose service → Compose file: **`infra/compose/dokploy.yml`**
 2. Isolated Deployments: **On**
 3. **Advanced → Command: delete any custom command** (do not use `base.yml` + `production.yml` + `--profile apps`). That command interpolates `${JWT_ACCESS_SECRET:?}` before Dokploy’s `.env` is loaded and the deploy fails.
-4. Environment: paste `infra/env/dokploy.env.example` with real secrets. You **must** set `DATABASE_URL`, `RABBITMQ_DEFAULT_PASS` (same as `RABBITMQ_PASSWORD`), `MINIO_ROOT_PASSWORD` (same as `S3_SECRET_KEY`), and `SEED_ADMIN_PASSWORD` (min 12 chars — migrate runs the APC production seed after migrations).
+4. Environment: paste `infra/env/dokploy.env.example` with real secrets. You **must** set `POSTGRES_PASSWORD` (this is the live DB password — changing it on an existing volume is now applied on Postgres healthcheck), `DATABASE_URL` (host `postgres`; the password is rebuilt from `POSTGRES_PASSWORD` at runtime), `RABBITMQ_DEFAULT_PASS` (same as `RABBITMQ_PASSWORD`), `MINIO_ROOT_PASSWORD` (same as `S3_SECRET_KEY`), and `SEED_ADMIN_PASSWORD` (min 12 chars — migrate runs the APC production seed after migrations).
 5. Domains → Add Domain → service **`api`**, container port **`3002`**, HTTPS on
 6. Do not deploy `edge.yml` / Caddy on the same host (Traefik already binds 80/443)
 
 Services in that file: `postgres`, `redis`, `rabbitmq`, `minio`, `minio-init`, `migrate`, **`api`**.
+
+If login returns 500 with `Authentication failed against the database server` for user `electromon`, the Postgres volume was created with a different password than `POSTGRES_PASSWORD`. Redeploy after this compose change — the Postgres healthcheck runs `ALTER USER` so the live role matches `POSTGRES_PASSWORD`, and the API rebuilds `DATABASE_URL` from that value. Do not wipe the volume unless you intend to lose data.
 
 ---
 

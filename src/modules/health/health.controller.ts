@@ -1,5 +1,6 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Res } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { SkipThrottle } from '@nestjs/throttler';
 import { SkipAudit } from '../../common/audit/audit.decorators';
 import { Public } from '../../common/decorators/auth.decorators';
@@ -46,12 +47,16 @@ export class HealthController {
       },
     },
   })
-  async ready() {
+  async ready(@Res({ passthrough: true }) res?: Response) {
     const checks = await this.runChecks();
     const healthy = Object.values(checks).every((value) => value === 'connected');
 
     this.metrics.setDependencyStatus('postgres', checks.database === 'connected');
     this.metrics.setDependencyStatus('redis', checks.redis === 'connected');
+
+    if (!healthy) {
+      res?.status(HttpStatus.SERVICE_UNAVAILABLE);
+    }
 
     return {
       status: healthy ? 'ok' : 'degraded',
@@ -66,8 +71,8 @@ export class HealthController {
     summary: 'Health check (alias for readiness)',
     description: 'Backward-compatible alias used by Docker healthchecks.',
   })
-  async check() {
-    return this.ready();
+  async check(@Res({ passthrough: true }) res?: Response) {
+    return this.ready(res);
   }
 
   private async runChecks() {

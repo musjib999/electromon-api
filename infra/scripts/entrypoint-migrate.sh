@@ -1,6 +1,10 @@
 #!/bin/sh
 set -e
 
+# shellcheck disable=SC1091
+. /compose-database-url.sh
+electromon_export_database_url
+
 if [ -z "$DATABASE_URL" ]; then
   echo "ERROR: DATABASE_URL is not set"
   exit 1

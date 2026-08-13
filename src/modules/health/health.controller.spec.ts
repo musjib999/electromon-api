@@ -51,11 +51,13 @@ describe('HealthController', () => {
 
     it('returns degraded when database is down', async () => {
       prisma.$queryRaw.mockRejectedValue(new Error('db down'));
+      const res = { status: jest.fn().mockReturnThis() };
 
-      const result = await controller.ready();
+      const result = await controller.ready(res as never);
 
       expect(result.status).toBe('degraded');
       expect(result.checks.database).toBe('disconnected');
+      expect(res.status).toHaveBeenCalledWith(503);
     });
   });
 });
