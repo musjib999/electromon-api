@@ -27,7 +27,7 @@ Use the single-file stack instead:
 1. Compose service → Compose file: **`infra/compose/dokploy.yml`**
 2. Isolated Deployments: **On**
 3. **Advanced → Command: delete any custom command** (do not use `base.yml` + `production.yml` + `--profile apps`). That command interpolates `${JWT_ACCESS_SECRET:?}` before Dokploy’s `.env` is loaded and the deploy fails.
-4. Environment: paste `infra/env/dokploy.env.example` with real secrets. You **must** set `DATABASE_URL`, `RABBITMQ_DEFAULT_PASS` (same as `RABBITMQ_PASSWORD`), and `MINIO_ROOT_PASSWORD` (same as `S3_SECRET_KEY`).
+4. Environment: paste `infra/env/dokploy.env.example` with real secrets. You **must** set `DATABASE_URL`, `RABBITMQ_DEFAULT_PASS` (same as `RABBITMQ_PASSWORD`), `MINIO_ROOT_PASSWORD` (same as `S3_SECRET_KEY`), and `SEED_ADMIN_PASSWORD` (min 12 chars — migrate runs the APC production seed after migrations).
 5. Domains → Add Domain → service **`api`**, container port **`3002`**, HTTPS on
 6. Do not deploy `edge.yml` / Caddy on the same host (Traefik already binds 80/443)
 
@@ -94,8 +94,8 @@ make infra-prod-up
 # set DATABASE_URL + Spaces keys, then:
 make infra-prod-external-up
 
-# One-time APC bootstrap (no demo results):
-SEED_ADMIN_PASSWORD='...' pnpm db:seed:production:apc
+# APC geography + campaign + director are seeded by the migrate container
+# when SEED_ADMIN_PASSWORD is set in .env (idempotent; no demo results).
 
 cd /opt/electromon-web
 cp infra/env/production.env.example .env
@@ -187,5 +187,5 @@ Never commit `.env`. Use `*.env.example` only.
 - [ ] Slack alerts firing (test alert)
 - [ ] Backup cron verified; restore drill done
 - [ ] `RUN_SEED=false` in production
-- [ ] APC production seed applied once
+- [ ] `SEED_ADMIN_PASSWORD` set (min 12 chars) so migrate seeds APC geography + director
 - [ ] Only 80/443/22 open on firewall

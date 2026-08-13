@@ -1,21 +1,24 @@
 # syntax=docker/dockerfile:1
 
-# Electromon Migrate — one-shot migration container (build context: api project root)
-# Does not compile bcrypt (seed-only devDependency). Production sets RUN_SEED=false.
+# Electromon Migrate — migrations + production APC seed (build context: api project root)
+# Layout matches seed imports: /app/db/prisma, /app/db/src, /app/shared/src
 
 FROM node:20-alpine
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
-RUN apk add --no-cache libc6-compat netcat-openbsd openssl
+RUN apk add --no-cache libc6-compat netcat-openbsd openssl python3 make g++ linux-headers
 
 WORKDIR /app
 
-COPY db/package.json db/pnpm-lock.yaml db/prisma.config.ts db/tsconfig.json ./
-COPY db/prisma ./prisma/
+COPY db/package.json db/pnpm-lock.yaml db/prisma.config.ts db/tsconfig.json ./db/
+COPY db/prisma ./db/prisma/
+COPY db/src ./db/src/
+COPY shared/src ./shared/src/
+COPY .npmrc ./db/
 
-# Skip lifecycle scripts: bcrypt's node-gyp build needs Python and is unused here.
-RUN pnpm install --frozen-lockfile --ignore-scripts
+WORKDIR /app/db
+RUN pnpm install --frozen-lockfile
 
 # Prisma 7 loads prisma.config.ts at generate time; a dummy URL is enough (no DB connect).
 RUN DATABASE_URL="postgresql://build:build@127.0.0.1:5432/build?schema=public" npx prisma generate

@@ -8,6 +8,7 @@ services:
     environment:
       DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
       RUN_SEED: "false"
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
 
   api:
     depends_on:

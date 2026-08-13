@@ -29,6 +29,9 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-electromon}:${POSTGRES_PASSWORD:-electromon}@postgres:5432/${POSTGRES_DB:-electromon}?schema=public
       RUN_SEED: ${RUN_SEED:-false}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-}
+      SEED_ADMIN_PHONE: ${SEED_ADMIN_PHONE:-}
     depends_on:
       postgres:
         condition: service_healthy

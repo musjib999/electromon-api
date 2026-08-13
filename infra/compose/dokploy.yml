@@ -107,6 +107,8 @@ services:
     env_file:
       - .env
     environment:
+      # Demo seed stays off. APC production seed runs after migrate when
+      # SEED_ADMIN_PASSWORD is set in Dokploy Environment (min 12 chars).
       RUN_SEED: "false"
     depends_on:
       postgres:

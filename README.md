@@ -133,7 +133,7 @@ pnpm db:seed:production:apc  # Production APC: geography + campaign + director o
 pnpm db:generate         # regenerate Prisma client
 ```
 
-Production APC seed requires `SEED_ADMIN_PASSWORD` (min 12 chars). See `infra/env/production.env.example`.
+Production APC seed requires `SEED_ADMIN_PASSWORD` (min 12 chars). On Dokploy / Docker deploy, the migrate container runs it after `prisma migrate deploy` when that variable is set. See `infra/env/dokploy.env.example`.
 
 Deploy (local / staging / production): see [infra/DEPLOY.md](./infra/DEPLOY.md).
 

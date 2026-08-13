@@ -30,6 +30,7 @@
  *   pnpm --dir db seed:production:apc
  *   # or from electromon-api:
  *   pnpm db:seed:production:apc
+ *   # or automatically after migrate on deploy when SEED_ADMIN_PASSWORD is set
  */
 import { config } from 'dotenv';
 import { resolve } from 'node:path';

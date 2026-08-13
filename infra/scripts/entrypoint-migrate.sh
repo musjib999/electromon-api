@@ -29,12 +29,17 @@ until nc -z "$db_host" "$db_port" 2>/dev/null; do
 done
 
 echo "==> Running database migrations..."
-cd /app
+cd /app/db
 npx prisma migrate deploy
 
-if [ "$RUN_SEED" = "true" ]; then
+if [ -n "$SEED_ADMIN_PASSWORD" ]; then
+  echo "==> Running production APC seed..."
+  npx tsx prisma/seed-production-apc.ts
+elif [ "$RUN_SEED" = "true" ]; then
   echo "==> Seeding database (demo seed)..."
   npx tsx prisma/seed.ts
+else
+  echo "==> Skipping seed (set SEED_ADMIN_PASSWORD for APC production seed)."
 fi
 
 echo "==> Migrations complete."
