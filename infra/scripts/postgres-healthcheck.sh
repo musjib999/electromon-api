@@ -20,9 +20,11 @@ if [ -f "$stamp" ] && [ "$(cat "$stamp")" = "$hash" ]; then
   exit 0
 fi
 
-psql -v ON_ERROR_STOP=1 -U "$user" -d "$db" \
-  --set=pw="$POSTGRES_PASSWORD" \
-  -c "ALTER USER ${user} WITH PASSWORD :'pw';" >/dev/null
+# -c sends SQL to the server as-is (no psql :variable interpolation).
+# Stdin/script mode is required for :'pw'.
+psql -v ON_ERROR_STOP=1 -U "$user" -d "$db" --set=pw="$POSTGRES_PASSWORD" >/dev/null <<EOF
+ALTER USER ${user} WITH PASSWORD :'pw';
+EOF
 
 printf '%s' "$hash" > "$stamp"
 echo "Synced role ${user} password to POSTGRES_PASSWORD"
